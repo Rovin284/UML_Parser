@@ -12,7 +12,12 @@ class JavaParser {
 	private String getMethods(String code){
                 //Code for getting Method names
         }	
-	
+	private String getAttributes(String code){
+                //Code for getting Method names
+        }
+	private String getInterface(String code){
+                //Code for getting Method names
+        }	
 	public static void main(String[] args) {
         	System.out.println("Java Parser!"); 
     	}
