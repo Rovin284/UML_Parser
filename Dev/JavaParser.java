@@ -8,6 +8,10 @@ class JavaParser {
 	private String getClassName(String code){
 		//Code for getting class name
 	}
+
+	private String getMethods(String code){
+                //Code for getting Method names
+        }	
 	
 	public static void main(String[] args) {
         	System.out.println("Java Parser!"); 
