@@ -5,6 +5,10 @@ class JavaParser {
 		ClassOrInterfaceDeclaration classA = compilationUnit.getClassByName("A");
     	}
 	
+	private String getDependency(String code){
+                //Code for getting class name
+        }
+	
 	private String getClassName(String code){
 		//Code for getting class name
 	}
