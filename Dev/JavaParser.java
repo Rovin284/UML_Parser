@@ -6,9 +6,12 @@ class JavaParser {
     	}
 	
 	private String getDependency(String code){
-                //Code for getting class name
+                //Code for getting dependency between classes
         }
-	
+
+	private String getMultiplicity(String code){
+                //Code for getting multiplicity relationship
+        }	
 	private String getClassName(String code){
 		//Code for getting class name
 	}
