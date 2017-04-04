@@ -1,5 +1,6 @@
 class JavaParser {
     //Reference Code for AST Abstract Syntax Tree
+	boolean codeFlag = true;
 	public ASTNode Test{
 		CompilationUnit compilationUnit = JavaParser.parse("class A { }");
 		ClassOrInterfaceDeclaration classA = compilationUnit.getClassByName("A");
@@ -28,4 +29,5 @@ class JavaParser {
 	public static void main(String[] args) {
         	System.out.println("Java Parser!"); 
     	}
+	
 }
