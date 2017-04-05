@@ -1,11 +1,18 @@
+import java.io.File;
 class JavaParser {
     //Reference Code for AST Abstract Syntax Tree
 	boolean codeFlag = true;
+	final String inputPath;
+	final String outputPath;
+	public JavaParser(String inputPath, String outputPath){
+		this.inputPath = inputPath;
+		this.outputPath = inputPath + "\\Output\\" +  outputPath +".png";
+	}
 	public ASTNode Test{
 		CompilationUnit compilationUnit = JavaParser.parse("class A { }");
 		ClassOrInterfaceDeclaration classA = compilationUnit.getClassByName("A");
     	}
-	
+		
 	private String getDependency(String code){
                 //Code for getting dependency between classes
         }
