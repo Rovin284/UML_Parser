@@ -1,0 +1,124 @@
+/**
+ * Created by rovinpatwal on 4/9/17.
+ */
+
+import com.github.javaparser.JavaParser;
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.body.*;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+public class JavaParserA {
+    HashMap<String, Boolean> map;
+    HashMap<String, String> mapClassConn;
+    private static ArrayList<CompilationUnit> cuArray;
+    public JavaParserA() {
+        System.out.println("Rovin");
+        //CompilationUnit compilationUnit = JavaParser.parse("class A { }");
+        //ClassOrInterfaceDeclaration classA = compilationUnit.getClassByName("A");
+    }
+
+    public static void main(String[] args) throws Exception {
+        JavaParserA JP = new JavaParserA();
+        System.out.println("Hello World");
+        String inputForYUML = "";
+        cuArray = JP.getFileArray("/Volumes/Macintosh HD/SJSU/202/CodeJavaParser/uml-parser-test-4");
+        int counter = 1;
+        for (CompilationUnit cu : cuArray) {
+            inputForYUML += JP.getYUMLCode(cu);
+            //System.out.println("Counter "+counter);
+            counter++;
+        }
+        System.out.println(inputForYUML);
+    }
+
+    private String getYUMLCode(CompilationUnit cu) {
+        String result = "";
+        String className = "";
+        className = getClassName(cu);
+        //classShortName = coi.getName();
+        return className;
+    }
+
+    //Done
+    private ArrayList<CompilationUnit> getFileArray(String inputPath) throws Exception {
+        ArrayList<CompilationUnit> fileArray = new ArrayList<CompilationUnit>();
+        File folder = new File(inputPath);
+        File[] folderFiles = folder.listFiles();
+        for (int i = 0; i < folderFiles.length; i++) {
+            if (folderFiles[i].isFile() && folderFiles[i].getName().endsWith(".java")) {
+                CompilationUnit cu;
+                FileInputStream input = new FileInputStream(folderFiles[i]);
+                try {
+                    cu = JavaParser.parse(input);
+                    fileArray.add(cu);
+                } finally {
+                    input.close();
+                }
+            } else if(folderFiles[i].isDirectory()) {
+                System.out.println("Not a file");
+            }
+        }
+        return fileArray;
+    }
+
+    private String getClassName(CompilationUnit cu) {
+        String strClassName = "";
+        List<TypeDeclaration> ltd = cu.getTypes();
+        Node node = ltd.get(0); // assuming no nested classes
+
+        // Get className
+        ClassOrInterfaceDeclaration coi = (ClassOrInterfaceDeclaration) node;
+        if (coi.isInterface()) {
+            strClassName = "[" + "<<interface>>;";
+        } else {
+            strClassName = "[";
+        }
+
+        strClassName += coi.getName();
+
+        List<BodyDeclaration> member1s = ((TypeDeclaration) node).getMembers();
+        for(int i = 0; i < member1s.size(); i++) {
+            if(member1s.get(i) instanceof FieldDeclaration) {
+                System.out.println("Field --- "+member1s.get(i));
+                int fieldDeclarationModifiers = ((FieldDeclaration) member1s.get(i)).getModifiers();
+                boolean proceed = false;
+                System.out.println("fieldDeclarationModifiers --- "+fieldDeclarationModifiers);
+               /* switch(fieldDeclarationModifiers)
+                {
+                    case ModifierSet.PRIVATE:
+                        modifierValue = symbols.privateAccess;
+                        proceed = true;
+                        break;
+                    case ModifierSet.PUBLIC:
+                        modifierValue = symbols.publicAccess;
+                        proceed = true;
+                        break;
+                    case ModifierSet.PUBLIC+ModifierSet.STATIC:
+                        modifierValue = symbols.publicStaticAccess;
+                        proceed = true;
+                        break;
+                }*/
+            }
+            if(member1s.get(i) instanceof ConstructorDeclaration) {
+                System.out.println("Constructor --- " + member1s.get(i));
+            }
+            if (member1s.get(i) instanceof MethodDeclaration) {
+                System.out.println("Method --- " + member1s.get(i));
+                //MethodDeclaration md = ((MethodDeclaration) member1s.get(i));
+                //System.out.println(md);
+                if (((MethodDeclaration) member1s.get(i)).getDeclarationAsString().startsWith("public")
+                        && !coi.isInterface()) {
+                    System.out.println("12345");
+                }
+            }
+        }
+        return strClassName;
+    }
+}
+
