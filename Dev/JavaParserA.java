@@ -84,26 +84,26 @@ public class JavaParserA {
 
         List<BodyDeclaration> member1s = ((TypeDeclaration) node).getMembers();
         for(int i = 0; i < member1s.size(); i++) {
+            String modifier = "";
             if(member1s.get(i) instanceof FieldDeclaration) {
                 System.out.println("Field --- "+member1s.get(i));
                 int fieldDeclarationModifiers = ((FieldDeclaration) member1s.get(i)).getModifiers();
                 boolean proceed = false;
                 System.out.println("fieldDeclarationModifiers --- "+fieldDeclarationModifiers);
-               /* switch(fieldDeclarationModifiers)
-                {
-                    case ModifierSet.PRIVATE:
-                        modifierValue = symbols.privateAccess;
-                        proceed = true;
-                        break;
-                    case ModifierSet.PUBLIC:
-                        modifierValue = symbols.publicAccess;
-                        proceed = true;
-                        break;
-                    case ModifierSet.PUBLIC+ModifierSet.STATIC:
-                        modifierValue = symbols.publicStaticAccess;
-                        proceed = true;
-                        break;
-                }*/
+                if(fieldDeclarationModifiers == ModifierSet.PRIVATE) {
+                    modifier = "-";
+                } else if (fieldDeclarationModifiers == ModifierSet.PUBLIC){
+                    modifier = "+";
+                } else if(fieldDeclarationModifiers == ModifierSet.PUBLIC+ModifierSet.STATIC) {
+                    modifier = "+";
+                }
+                System.out.println("modifier "+modifier);
+                List<Node> fieldChildNodes = ((FieldDeclaration) member1s.get(i)).getChildrenNodes();
+                String nodeType = ((FieldDeclaration) member1s.get(i)).getType().toString();
+                System.out.println("nodeType --- "+nodeType);
+                for(int k = 0; k < fieldChildNodes.size(); k++){
+                    System.out.println("Rovin123 --- "+fieldChildNodes.get(i));
+                }
             }
             if(member1s.get(i) instanceof ConstructorDeclaration) {
                 System.out.println("Constructor --- " + member1s.get(i));
