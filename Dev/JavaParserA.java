@@ -69,6 +69,7 @@ public class JavaParserA {
 
     private String getClassName(CompilationUnit cu) {
         String strClassName = "";
+        ArrayList<String> makeFieldPublic = new ArrayList<String>();
         List<TypeDeclaration> ltd = cu.getTypes();
         Node node = ltd.get(0); // assuming no nested classes
 
@@ -112,9 +113,14 @@ public class JavaParserA {
                 System.out.println("Method --- " + member1s.get(i));
                 //MethodDeclaration md = ((MethodDeclaration) member1s.get(i));
                 //System.out.println(md);
-                if (((MethodDeclaration) member1s.get(i)).getDeclarationAsString().startsWith("public")
+                if (((MethodDeclaration) member1s.get(i)).getDeclarationAsString().substring(0,4) == "public"
                         && !coi.isInterface()) {
                     System.out.println("12345");
+                    if (((MethodDeclaration) member1s.get(i)).getName().substring(0,2) == "set"
+                            || ((MethodDeclaration) member1s.get(i)).getName().substring(0,2) == "get") {
+                        String varName = ((MethodDeclaration) member1s.get(i)).getName().substring(3);
+                        makeFieldPublic.add(varName.toLowerCase());
+                    }
                 }
             }
         }
