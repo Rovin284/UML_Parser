@@ -16,6 +16,7 @@ import java.util.List;
 public class JavaParserA {
     HashMap<String, Boolean> map;
     HashMap<String, String> mapClassConn;
+    ArrayList<String> dependentClass = new ArrayList<String>();
     private static ArrayList<CompilationUnit> cuArray;
     public JavaParserA() {
         System.out.println("Rovin");
@@ -25,9 +26,8 @@ public class JavaParserA {
 
     public static void main(String[] args) throws Exception {
         JavaParserA JP = new JavaParserA();
-        System.out.println("Hello World");
         String inputForYUML = "";
-        cuArray = JP.getFileArray("/Volumes/Macintosh HD/SJSU/202/CodeJavaParser/uml-parser-test-4");
+        cuArray = JP.getFileArray("/Volumes/Macintosh HD/SJSU/202/CodeJavaParser/Test1");
         int counter = 1;
         for (CompilationUnit cu : cuArray) {
             inputForYUML += JP.getYUMLCode(cu);
@@ -69,7 +69,9 @@ public class JavaParserA {
 
     private String getClassName(CompilationUnit cu) {
         String strClassName = "";
+        String returnString = "";
         ArrayList<String> makeFieldPublic = new ArrayList<String>();
+        HashMap<String,String> hMapClass = new HashMap<String,String>();
         List<TypeDeclaration> ltd = cu.getTypes();
         Node node = ltd.get(0); // assuming no nested classes
 
@@ -82,10 +84,12 @@ public class JavaParserA {
         }
 
         strClassName += coi.getName();
-
+        returnString = returnString + strClassName +"|";
+        System.out.println("ClassName --- "+strClassName);
         List<BodyDeclaration> member1s = ((TypeDeclaration) node).getMembers();
         for(int i = 0; i < member1s.size(); i++) {
             String modifier = "";
+            String nType = "";
             if(member1s.get(i) instanceof FieldDeclaration) {
                 System.out.println("Field --- "+member1s.get(i));
                 int fieldDeclarationModifiers = ((FieldDeclaration) member1s.get(i)).getModifiers();
@@ -99,12 +103,22 @@ public class JavaParserA {
                     modifier = "+";
                 }
                 System.out.println("modifier "+modifier);
+                //returnString = returnString + modifier + " ";
                 List<Node> fieldChildNodes = ((FieldDeclaration) member1s.get(i)).getChildrenNodes();
                 String nodeType = ((FieldDeclaration) member1s.get(i)).getType().toString();
-                System.out.println("nodeType --- "+nodeType);
-                for(int k = 0; k < fieldChildNodes.size(); k++){
-                    System.out.println("Rovin123 --- "+fieldChildNodes.get(i));
+                System.out.println("nodeType1234 --- " + nodeType);
+                if(nodeType.contains("int") || nodeType.contains("String")) {
+                    System.out.println("nodeType --- " + nodeType);
+                    nType = filterName(nodeType);
+                    returnString = returnString + modifier + " " + fieldChildNodes.get(1) + " : " + nType + ";";
+                } else {
+                    hMapClass.put(member1s.get(i).toString(),nodeType);
                 }
+
+                //for(int k = 0; k < fieldChildNodes.size(); k++){
+                    System.out.println("fieldName --- "+fieldChildNodes.get(1));
+                //}
+
             }
             if(member1s.get(i) instanceof ConstructorDeclaration) {
                 System.out.println("Constructor --- " + member1s.get(i));
@@ -124,7 +138,16 @@ public class JavaParserA {
                 }
             }
         }
+        System.out.println("Output : "+returnString + "]");
+        if(hMapClass.containsKey(strClassName)) {
+            //if(strClassName )
+        }
         return strClassName;
+    }
+
+    private String filterName (String name){
+        name = name.replace("[]","(*)");
+        return name;
     }
 }
 
