@@ -27,7 +27,7 @@ public class JavaParserA {
     public static void main(String[] args) throws Exception {
         JavaParserA JP = new JavaParserA();
         String inputForYUML = "";
-        cuArray = JP.getFileArray("/Volumes/Macintosh HD/SJSU/202/CodeJavaParser/Test1");
+        cuArray = JP.getFileArray("/Volumes/Macintosh HD/SJSU/202/CodeJavaParser/uml-parser-test-2");
         int counter = 1;
         for (CompilationUnit cu : cuArray) {
             inputForYUML += JP.getYUMLCode(cu);
@@ -67,11 +67,16 @@ public class JavaParserA {
         return fileArray;
     }
 
+    String returnString = "";
+    HashMap<String,String> hMapClass = new HashMap<String,String>();
     private String getClassName(CompilationUnit cu) {
+
         String strClassName = "";
-        String returnString = "";
+        String returnDepString = "";
+        String returnModString = "";
+        String returnClassString = "";
+        boolean depFlag = false;
         ArrayList<String> makeFieldPublic = new ArrayList<String>();
-        HashMap<String,String> hMapClass = new HashMap<String,String>();
         List<TypeDeclaration> ltd = cu.getTypes();
         Node node = ltd.get(0); // assuming no nested classes
 
@@ -80,11 +85,11 @@ public class JavaParserA {
         if (coi.isInterface()) {
             strClassName = "[" + "<<interface>>;";
         } else {
-            strClassName = "[";
+            strClassName = "";
         }
 
         strClassName += coi.getName();
-        returnString = returnString + strClassName +"|";
+        returnClassString = returnClassString + "[" + strClassName +"|";
         System.out.println("ClassName --- "+strClassName);
         List<BodyDeclaration> member1s = ((TypeDeclaration) node).getMembers();
         for(int i = 0; i < member1s.size(); i++) {
@@ -103,6 +108,7 @@ public class JavaParserA {
                     modifier = "+";
                 }
                 System.out.println("modifier "+modifier);
+                System.out.println("Type --- "+((FieldDeclaration) member1s.get(i)).getVariables());
                 //returnString = returnString + modifier + " ";
                 List<Node> fieldChildNodes = ((FieldDeclaration) member1s.get(i)).getChildrenNodes();
                 String nodeType = ((FieldDeclaration) member1s.get(i)).getType().toString();
@@ -110,9 +116,18 @@ public class JavaParserA {
                 if(nodeType.contains("int") || nodeType.contains("String")) {
                     System.out.println("nodeType --- " + nodeType);
                     nType = filterName(nodeType);
-                    returnString = returnString + modifier + " " + fieldChildNodes.get(1) + " : " + nType + ";";
+                    returnModString = returnModString + modifier + " " + fieldChildNodes.get(1) + " : " + nType + ";";
                 } else {
-                    hMapClass.put(member1s.get(i).toString(),nodeType);
+                    String collectionClassName = "";
+                    System.out.println("Check 1234 "+nodeType);
+                    if(nodeType.startsWith("Collection")) {
+                        collectionClassName = nodeType.substring(11,nodeType.length()-1);
+                        System.out.println("Key --- "+collectionClassName);
+                    } else
+                        collectionClassName = nodeType;
+                    if(! hMapClass.containsKey(collectionClassName)) {
+                        hMapClass.put(collectionClassName, nodeType + "|" + strClassName);
+                    }
                 }
 
                 //for(int k = 0; k < fieldChildNodes.size(); k++){
@@ -138,10 +153,44 @@ public class JavaParserA {
                 }
             }
         }
-        System.out.println("Output : "+returnString + "]");
+
         if(hMapClass.containsKey(strClassName)) {
+            depFlag = true;
+            System.out.println("hmap : "+hMapClass);
             //if(strClassName )
+            String strDependency = "";
+            String dependentPart = "";
+            String className = "";
+            String remName = "";
+            int classNameIndex = 0;
+            strDependency = hMapClass.get(strClassName);
+            classNameIndex = strDependency.indexOf("|");
+            System.out.println("Rovin 1234 "+strDependency +"|" + classNameIndex);
+            className = strDependency.substring(classNameIndex+1,strDependency.length());
+            remName = strDependency.substring(0,classNameIndex);
+            System.out.println("strDependency ------------ "+strDependency);
+            System.out.println("strClassName1234 ------------ "+strClassName);
+            System.out.println("remName ------------ "+remName);
+            if(strClassName != remName) {
+                if (strDependency.contains("Collection")) {
+                    dependentPart = dependentPart + "-*[" + strClassName + "]";
+                } else {
+                    dependentPart = dependentPart + "-1[" + strClassName + "]";
+                }
+
+                if (returnString.contains(",")) {
+                    returnDepString = returnDepString + "[" + className + "]" + dependentPart;
+                } else {
+                    returnDepString = returnDepString + "]" + dependentPart;
+                }
+            }
         }
+        if(depFlag) {
+            returnString = returnString + returnModString +returnDepString + "],";
+        } else
+        returnString = returnString + returnClassString + returnModString +returnDepString + "],";
+        System.out.println("Output : "+returnString + "]");
+
         return strClassName;
     }
 
