@@ -6,6 +6,7 @@ import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.*;
+import com.github.javaparser.ast.type.ClassOrInterfaceType;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -69,12 +70,16 @@ public class JavaParserA {
 
     String returnString = "";
     HashMap<String,String> hMapClass = new HashMap<String,String>();
+    HashMap<String,String> interfaceMap = new HashMap<String,String>();
     private String getClassName(CompilationUnit cu) {
 
         String strClassName = "";
         String returnDepString = "";
         String returnModString = "";
         String returnClassString = "";
+        String additions = "";
+        String add2 = "";
+
         boolean depFlag = false;
         ArrayList<String> makeFieldPublic = new ArrayList<String>();
         List<TypeDeclaration> ltd = cu.getTypes();
@@ -84,12 +89,32 @@ public class JavaParserA {
         ClassOrInterfaceDeclaration coi = (ClassOrInterfaceDeclaration) node;
         if (coi.isInterface()) {
             strClassName = "[" + "<<interface>>;";
+            strClassName += coi.getName();
+            //interfaceString = interfaceString + "[" + strClassName;
+            interfaceMap.put(coi.getName(),strClassName);
+
         } else {
-            strClassName = "";
+            //strClassName = "";
+            strClassName += coi.getName();
+            returnClassString = returnClassString + "[" + strClassName +"|";
         }
 
-        strClassName += coi.getName();
-        returnClassString = returnClassString + "[" + strClassName +"|";
+        if (coi.getExtends() != null) {
+            additions += "[" + coi.getName() + "] " + "-^ " + coi.getExtends();
+            additions += ",";
+            System.out.println("Extends ---- "+additions);
+        }
+        if (coi.getImplements() != null) {
+            List<ClassOrInterfaceType> interfaceList = (List<ClassOrInterfaceType>) coi
+                    .getImplements();
+            for (ClassOrInterfaceType intface : interfaceList) {
+                additions += "[" + coi.getName() + "] " + "-.-^ " + "["
+                        + "<<interface>>;" + intface + "]";
+                additions += ",";
+            }
+            System.out.println("adInt ---- " + additions);
+        }
+
         System.out.println("ClassName --- "+strClassName);
         List<BodyDeclaration> member1s = ((TypeDeclaration) node).getMembers();
         for(int i = 0; i < member1s.size(); i++) {
@@ -139,16 +164,38 @@ public class JavaParserA {
                 System.out.println("Constructor --- " + member1s.get(i));
             }
             if (member1s.get(i) instanceof MethodDeclaration) {
+                String methodNameString = "";
                 System.out.println("Method --- " + member1s.get(i));
+                String mod = ((MethodDeclaration) member1s.get(i)).getDeclarationAsString().substring(0,6);
+
                 //MethodDeclaration md = ((MethodDeclaration) member1s.get(i));
                 //System.out.println(md);
-                if (((MethodDeclaration) member1s.get(i)).getDeclarationAsString().substring(0,4) == "public"
+                if (((MethodDeclaration) member1s.get(i)).getDeclarationAsString().substring(0,6).equals("public")
                         && !coi.isInterface()) {
                     System.out.println("12345");
                     if (((MethodDeclaration) member1s.get(i)).getName().substring(0,2) == "set"
                             || ((MethodDeclaration) member1s.get(i)).getName().substring(0,2) == "get") {
                         String varName = ((MethodDeclaration) member1s.get(i)).getName().substring(3);
                         makeFieldPublic.add(varName.toLowerCase());
+                    } else {
+                        int fIndex;
+                        int lIndex;
+                        fIndex = ((MethodDeclaration) member1s.get(i)).getChildrenNodes().toString().indexOf(", ");
+                        if(fIndex > 0) {
+                            System.out.println("fIndex  --- " + fIndex);
+                            String strRem = ((MethodDeclaration) member1s.get(i)).getChildrenNodes().toString().substring(fIndex + 2);
+                            System.out.println("strRem  --- " + strRem);
+                            lIndex = strRem.indexOf(" ");
+                            //lIndex = ((MethodDeclaration) member1s.get(i)).getChildrenNodes().;
+                            String intName = strRem.substring(0,lIndex);
+                            System.out.println("Children node === " + ((MethodDeclaration) member1s.get(i)).getChildrenNodes());
+                            System.out.println("intNamee === " + intName);
+                            methodNameString = "+" + (((MethodDeclaration) member1s.get(i))).getName();
+                            System.out.println("methodName === " + methodNameString);
+                            if(interfaceMap.containsKey(intName)){
+                                add2 += add2 + "] uses -.->[<<interface>>;" +intName+"]" ;
+                            }
+                        }
                     }
                 }
             }
@@ -188,7 +235,7 @@ public class JavaParserA {
         if(depFlag) {
             returnString = returnString + returnModString +returnDepString + "],";
         } else
-        returnString = returnString + returnClassString + returnModString +returnDepString + "],";
+        returnString = returnString + returnClassString + returnModString +returnDepString + additions + add2+"],";
         System.out.println("Output : "+returnString + "]");
 
         return strClassName;
