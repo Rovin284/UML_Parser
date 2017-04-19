@@ -96,7 +96,9 @@ public class JavaParserA {
         } else {
             //strClassName = "";
             strClassName += coi.getName();
-            returnClassString = returnClassString + "[" + strClassName +"|";
+            if (coi.getExtends() == null) {
+                returnClassString = returnClassString + "[" + strClassName + "|";
+            }
         }
 
         if (coi.getExtends() != null) {
@@ -180,20 +182,26 @@ public class JavaParserA {
                     } else {
                         int fIndex;
                         int lIndex;
+                        int kIndex;
+                        String intName;
+                        String varName;
                         fIndex = ((MethodDeclaration) member1s.get(i)).getChildrenNodes().toString().indexOf(", ");
                         if(fIndex > 0) {
                             System.out.println("fIndex  --- " + fIndex);
                             String strRem = ((MethodDeclaration) member1s.get(i)).getChildrenNodes().toString().substring(fIndex + 2);
                             System.out.println("strRem  --- " + strRem);
                             lIndex = strRem.indexOf(" ");
+                            kIndex = strRem.indexOf(",");
                             //lIndex = ((MethodDeclaration) member1s.get(i)).getChildrenNodes().;
-                            String intName = strRem.substring(0,lIndex);
+                            intName = strRem.substring(0,lIndex);
+                            varName = strRem.substring(lIndex+1, kIndex);
                             System.out.println("Children node === " + ((MethodDeclaration) member1s.get(i)).getChildrenNodes());
-                            System.out.println("intNamee === " + intName);
-                            methodNameString = "+" + (((MethodDeclaration) member1s.get(i))).getName();
+                            System.out.println("intName === " + intName);
+                            System.out.println("varName === " + varName);
+                            methodNameString = "+" + (((MethodDeclaration) member1s.get(i))).getName() + "(" +varName +":"+intName+")";
                             System.out.println("methodName === " + methodNameString);
                             if(interfaceMap.containsKey(intName)){
-                                add2 += add2 + "] uses -.->[<<interface>>;" +intName+"]" ;
+                                add2 += add2 + methodNameString + "] uses -.->[<<interface>>;" +intName+"]" ;
                             }
                         }
                     }
