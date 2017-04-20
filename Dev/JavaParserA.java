@@ -96,13 +96,13 @@ public class JavaParserA {
         } else {
             //strClassName = "";
             strClassName += coi.getName();
-            if (coi.getExtends() == null) {
+            //if (coi.getExtends() == null) {
                 returnClassString = returnClassString + "[" + strClassName + "|";
-            }
+            //}
         }
 
         if (coi.getExtends() != null) {
-            additions += "[" + coi.getName() + "] " + "-^ " + coi.getExtends();
+            additions += "] " + "-^ " + coi.getExtends();
             additions += ",";
             System.out.println("Extends ---- "+additions);
         }
@@ -127,14 +127,7 @@ public class JavaParserA {
                 int fieldDeclarationModifiers = ((FieldDeclaration) member1s.get(i)).getModifiers();
                 boolean proceed = false;
                 System.out.println("fieldDeclarationModifiers --- "+fieldDeclarationModifiers);
-                if(fieldDeclarationModifiers == ModifierSet.PRIVATE) {
-                    modifier = "-";
-                } else if (fieldDeclarationModifiers == ModifierSet.PUBLIC){
-                    modifier = "+";
-                } else if(fieldDeclarationModifiers == ModifierSet.PUBLIC+ModifierSet.STATIC) {
-                    modifier = "+";
-                }
-                System.out.println("modifier "+modifier);
+
                 System.out.println("Type --- "+((FieldDeclaration) member1s.get(i)).getVariables());
                 //returnString = returnString + modifier + " ";
                 List<Node> fieldChildNodes = ((FieldDeclaration) member1s.get(i)).getChildrenNodes();
@@ -143,7 +136,18 @@ public class JavaParserA {
                 if(nodeType.contains("int") || nodeType.contains("String")) {
                     System.out.println("nodeType --- " + nodeType);
                     nType = filterName(nodeType);
-                    returnModString = returnModString + modifier + " " + fieldChildNodes.get(1) + " : " + nType + ";";
+                    if(fieldDeclarationModifiers == ModifierSet.PRIVATE) {
+                        modifier = "-";
+                        returnModString = returnModString + modifier + " " + fieldChildNodes.get(1) + " : " + nType + ";";
+                    } else if (fieldDeclarationModifiers == ModifierSet.PUBLIC){
+                        modifier = "+";
+                        returnModString = returnModString + modifier + " " + fieldChildNodes.get(1) + " : " + nType + ";";
+                    } else if(fieldDeclarationModifiers == ModifierSet.PUBLIC+ModifierSet.STATIC) {
+                        modifier = "+";
+                        returnModString = returnModString + modifier + " " + fieldChildNodes.get(1) + " : " + nType + ";";
+                    }
+                    System.out.println("modifier "+modifier);
+                    //returnModString = returnModString + modifier + " " + fieldChildNodes.get(1) + " : " + nType + ";";
                 } else {
                     String collectionClassName = "";
                     System.out.println("Check 1234 "+nodeType);
@@ -175,8 +179,9 @@ public class JavaParserA {
                 if (((MethodDeclaration) member1s.get(i)).getDeclarationAsString().substring(0,6).equals("public")
                         && !coi.isInterface()) {
                     System.out.println("12345");
-                    if (((MethodDeclaration) member1s.get(i)).getName().substring(0,2) == "set"
-                            || ((MethodDeclaration) member1s.get(i)).getName().substring(0,2) == "get") {
+                    System.out.println("Get SET "+((MethodDeclaration) member1s.get(i)).getName().substring(0,3));
+                    if (((MethodDeclaration) member1s.get(i)).getName().substring(0,3).equals("set")
+                            || ((MethodDeclaration) member1s.get(i)).getName().substring(0,3).equals("get")) {
                         String varName = ((MethodDeclaration) member1s.get(i)).getName().substring(3);
                         makeFieldPublic.add(varName.toLowerCase());
                     } else {
@@ -186,6 +191,8 @@ public class JavaParserA {
                         String intName;
                         String varName;
                         fIndex = ((MethodDeclaration) member1s.get(i)).getChildrenNodes().toString().indexOf(", ");
+                        System.out.println("methodNameString ---"+methodNameString);
+                        System.out.println("Children node === " + ((MethodDeclaration) member1s.get(i)).getChildrenNodes());
                         if(fIndex > 0) {
                             System.out.println("fIndex  --- " + fIndex);
                             String strRem = ((MethodDeclaration) member1s.get(i)).getChildrenNodes().toString().substring(fIndex + 2);
@@ -193,15 +200,30 @@ public class JavaParserA {
                             lIndex = strRem.indexOf(" ");
                             kIndex = strRem.indexOf(",");
                             //lIndex = ((MethodDeclaration) member1s.get(i)).getChildrenNodes().;
-                            intName = strRem.substring(0,lIndex);
-                            varName = strRem.substring(lIndex+1, kIndex);
-                            System.out.println("Children node === " + ((MethodDeclaration) member1s.get(i)).getChildrenNodes());
-                            System.out.println("intName === " + intName);
-                            System.out.println("varName === " + varName);
-                            methodNameString = "+" + (((MethodDeclaration) member1s.get(i))).getName() + "(" +varName +":"+intName+")";
-                            System.out.println("methodName === " + methodNameString);
-                            if(interfaceMap.containsKey(intName)){
-                                add2 += add2 + methodNameString + "] uses -.->[<<interface>>;" +intName+"]" ;
+                            if(lIndex > 0 && kIndex > 0) {
+                                intName = strRem.substring(0, lIndex);
+                                varName = strRem.substring(lIndex + 1, kIndex);
+                                System.out.println("intName === " + intName);
+                                System.out.println("varName === " + varName);
+                                methodNameString = "| +" + (((MethodDeclaration) member1s.get(i))).getName() + "(" + varName + ":" + intName + ") : " + ((MethodDeclaration) member1s.get(i)).getChildrenNodes().get(0);
+                                System.out.println("methodName === " + methodNameString);
+                                if (interfaceMap.containsKey(intName)) {
+                                    add2 += add2 + methodNameString + "] uses -.->[<<interface>>;" + intName + "]";
+                                } else {
+                                    add2 += add2 + methodNameString;
+                                }
+                            } else {
+                                String mod1 = "";
+                                String add3 = "";
+                                methodNameString = (((MethodDeclaration) member1s.get(i))).getName();
+                                if(((MethodDeclaration) member1s.get(i)).getDeclarationAsString().substring(0,6).equals("public")){
+                                    mod1 = "+";
+                                    add3 = add3 + mod1 + methodNameString + "(" + ((MethodDeclaration) member1s.get(i)).getChildrenNodes().get(1) + ") : " + ((MethodDeclaration) member1s.get(i)).getChildrenNodes().get(0) ;
+                                    System.out.println("add3 ====="+add3);
+                                } else if (((MethodDeclaration) member1s.get(i)).getDeclarationAsString().substring(0,6).equals("private")){
+                                    mod1 = "-";
+                                }
+                                System.out.println("methodNameString ====="+methodNameString);
                             }
                         }
                     }
