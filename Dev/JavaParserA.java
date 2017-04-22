@@ -28,7 +28,7 @@ public class JavaParserA {
     public static void main(String[] args) throws Exception {
         JavaParserA JP = new JavaParserA();
         String inputForYUML = "";
-        cuArray = JP.getFileArray("/Volumes/Macintosh HD/SJSU/202/CodeJavaParser/uml-parser-test-3");
+        cuArray = JP.getFileArray("/Volumes/Macintosh HD/SJSU/202/CodeJavaParser/uml-parser-test-4");
         int counter = 1;
         for (CompilationUnit cu : cuArray) {
             inputForYUML += JP.getYUMLCode(cu);
@@ -71,6 +71,7 @@ public class JavaParserA {
     String returnString = "";
     HashMap<String,String> hMapClass = new HashMap<String,String>();
     HashMap<String,String> interfaceMap = new HashMap<String,String>();
+    ArrayList<String> getterSetterName = new ArrayList<>();
     private String getClassName(CompilationUnit cu) {
 
         String strClassName = "";
@@ -79,7 +80,8 @@ public class JavaParserA {
         String returnClassString = "";
         String additions = "";
         String add2 = "";
-
+        HashMap<String,String> fieldNameMap = new HashMap<String,String>();
+        HashMap<String,String> fieldModMap = new HashMap<String,String>();
         boolean depFlag = false;
         ArrayList<String> makeFieldPublic = new ArrayList<String>();
         List<TypeDeclaration> ltd = cu.getTypes();
@@ -91,20 +93,20 @@ public class JavaParserA {
             strClassName = "[" + "<<interface>>;";
             strClassName += coi.getName();
             //interfaceString = interfaceString + "[" + strClassName;
-            interfaceMap.put(coi.getName(),strClassName);
+            interfaceMap.put(coi.getName(), strClassName);
 
         } else {
             //strClassName = "";
             strClassName += coi.getName();
             //if (coi.getExtends() == null) {
-                returnClassString = returnClassString + "[" + strClassName + "|";
+            returnClassString = returnClassString + "[" + strClassName + "|";
             //}
         }
 
         if (coi.getExtends() != null) {
             additions += "] " + "-^ " + coi.getExtends();
             additions += ",";
-            System.out.println("Extends ---- "+additions);
+            System.out.println("Extends ---- " + additions);
         }
         if (coi.getImplements() != null) {
             List<ClassOrInterfaceType> interfaceList = (List<ClassOrInterfaceType>) coi
@@ -117,73 +119,30 @@ public class JavaParserA {
             System.out.println("adInt ---- " + additions);
         }
 
-        System.out.println("ClassName --- "+strClassName);
+        System.out.println("ClassName --- " + strClassName);
         List<BodyDeclaration> member1s = ((TypeDeclaration) node).getMembers();
-        for(int i = 0; i < member1s.size(); i++) {
+        for (int i = 0; i < member1s.size(); i++) {
             String modifier = "";
             String nType = "";
-            if(member1s.get(i) instanceof FieldDeclaration) {
-                System.out.println("Field --- "+member1s.get(i));
-                int fieldDeclarationModifiers = ((FieldDeclaration) member1s.get(i)).getModifiers();
-                boolean proceed = false;
-                System.out.println("fieldDeclarationModifiers --- "+fieldDeclarationModifiers);
-
-                System.out.println("Type --- "+((FieldDeclaration) member1s.get(i)).getVariables());
-                //returnString = returnString + modifier + " ";
-                List<Node> fieldChildNodes = ((FieldDeclaration) member1s.get(i)).getChildrenNodes();
-                String nodeType = ((FieldDeclaration) member1s.get(i)).getType().toString();
-                System.out.println("nodeType1234 --- " + nodeType);
-                if(nodeType.contains("int") || nodeType.contains("String")) {
-                    System.out.println("nodeType --- " + nodeType);
-                    nType = filterName(nodeType);
-                    if(fieldDeclarationModifiers == ModifierSet.PRIVATE) {
-                        modifier = "-";
-                        returnModString = returnModString + modifier + " " + fieldChildNodes.get(1) + " : " + nType + ";";
-                    } else if (fieldDeclarationModifiers == ModifierSet.PUBLIC){
-                        modifier = "+";
-                        returnModString = returnModString + modifier + " " + fieldChildNodes.get(1) + " : " + nType + ";";
-                    } else if(fieldDeclarationModifiers == ModifierSet.PUBLIC+ModifierSet.STATIC) {
-                        modifier = "+";
-                        returnModString = returnModString + modifier + " " + fieldChildNodes.get(1) + " : " + nType + ";";
-                    }
-                    System.out.println("modifier "+modifier);
-                    //returnModString = returnModString + modifier + " " + fieldChildNodes.get(1) + " : " + nType + ";";
-                } else {
-                    String collectionClassName = "";
-                    System.out.println("Check 1234 "+nodeType);
-                    if(nodeType.startsWith("Collection")) {
-                        collectionClassName = nodeType.substring(11,nodeType.length()-1);
-                        System.out.println("Key --- "+collectionClassName);
-                    } else
-                        collectionClassName = nodeType;
-                    if(! hMapClass.containsKey(collectionClassName)) {
-                        hMapClass.put(collectionClassName, nodeType + "|" + strClassName);
-                    }
-                }
-
-                //for(int k = 0; k < fieldChildNodes.size(); k++){
-                    System.out.println("fieldName --- "+fieldChildNodes.get(1));
-                //}
-
-            }
-            if(member1s.get(i) instanceof ConstructorDeclaration) {
-                System.out.println("Constructor --- " + member1s.get(i));
-            }
             if (member1s.get(i) instanceof MethodDeclaration) {
                 String methodNameString = "";
                 System.out.println("Method --- " + member1s.get(i));
-                String mod = ((MethodDeclaration) member1s.get(i)).getDeclarationAsString().substring(0,6);
+                String mod = ((MethodDeclaration) member1s.get(i)).getDeclarationAsString().substring(0, 6);
 
                 //MethodDeclaration md = ((MethodDeclaration) member1s.get(i));
                 //System.out.println(md);
-                if (((MethodDeclaration) member1s.get(i)).getDeclarationAsString().substring(0,6).equals("public")
+                if (((MethodDeclaration) member1s.get(i)).getDeclarationAsString().substring(0, 6).equals("public")
                         && !coi.isInterface()) {
                     System.out.println("12345");
-                    System.out.println("Get SET "+((MethodDeclaration) member1s.get(i)).getName().substring(0,3));
-                    if (((MethodDeclaration) member1s.get(i)).getName().substring(0,3).equals("set")
-                            || ((MethodDeclaration) member1s.get(i)).getName().substring(0,3).equals("get")) {
+                    System.out.println("Get SET " + ((MethodDeclaration) member1s.get(i)).getName().substring(0, 3));
+                    System.out.println("Get SET " + ((MethodDeclaration) member1s.get(i)).getName().substring(3));
+                    if (((MethodDeclaration) member1s.get(i)).getName().substring(0, 3).equals("set")
+                            || ((MethodDeclaration) member1s.get(i)).getName().substring(0, 3).equals("get")) {
                         String varName = ((MethodDeclaration) member1s.get(i)).getName().substring(3);
-                        makeFieldPublic.add(varName.toLowerCase());
+                        System.out.println("varName " + varName);
+                        //makeFieldPublic.add(varName.toLowerCase());
+                        getterSetterName.add(varName.toLowerCase());
+                        System.out.println("GetterSetterName " + getterSetterName);
                     } else {
                         int fIndex;
                         int lIndex;
@@ -191,21 +150,21 @@ public class JavaParserA {
                         String intName;
                         String varName;
                         fIndex = ((MethodDeclaration) member1s.get(i)).getChildrenNodes().toString().indexOf(", ");
-                        System.out.println("methodNameString ---"+methodNameString);
+                        System.out.println("methodNameString ---" + methodNameString);
                         System.out.println("Children node === " + ((MethodDeclaration) member1s.get(i)).getChildrenNodes());
-                        if(fIndex > 0) {
+                        if (fIndex > 0) {
                             System.out.println("fIndex  --- " + fIndex);
                             String strRem = ((MethodDeclaration) member1s.get(i)).getChildrenNodes().toString().substring(fIndex + 2);
                             System.out.println("strRem  --- " + strRem);
                             lIndex = strRem.indexOf(" ");
                             kIndex = strRem.indexOf(",");
                             //lIndex = ((MethodDeclaration) member1s.get(i)).getChildrenNodes().;
-                            if(lIndex > 0 && kIndex > 0) {
+                            if (lIndex > 0 && kIndex > 0) {
                                 intName = strRem.substring(0, lIndex);
                                 varName = strRem.substring(lIndex + 1, kIndex);
                                 System.out.println("intName === " + intName);
                                 System.out.println("varName === " + varName);
-                                methodNameString = "| +" + (((MethodDeclaration) member1s.get(i))).getName() + "(" + varName + ":" + intName + ") : " + ((MethodDeclaration) member1s.get(i)).getChildrenNodes().get(0);
+                                methodNameString = "+ " + (((MethodDeclaration) member1s.get(i))).getName() + "(" + varName + ":" + intName + ") : " + ((MethodDeclaration) member1s.get(i)).getChildrenNodes().get(0);
                                 System.out.println("methodName === " + methodNameString);
                                 if (interfaceMap.containsKey(intName)) {
                                     add2 += add2 + methodNameString + "] uses -.->[<<interface>>;" + intName + "]";
@@ -218,34 +177,88 @@ public class JavaParserA {
                                 String param = "";
                                 String paramStr = "";
                                 methodNameString = (((MethodDeclaration) member1s.get(i))).getName();
-                                if(((MethodDeclaration) member1s.get(i)).getDeclarationAsString().substring(0,6).equals("public")){
+                                if (((MethodDeclaration) member1s.get(i)).getDeclarationAsString().substring(0, 6).equals("public")) {
                                     mod1 = "+";
                                     param = ((MethodDeclaration) member1s.get(i)).getChildrenNodes().get(1).toString();
-                                    System.out.println("Param ---"+param);
-                                    System.out.println("Param ---"+param.length());
-                                    Parameter paramCast;
+                                    System.out.println("Param ---" + param);
+                                    System.out.println("Param ---" + param.length());
+                                    //Parameter paramCast;
                                     //paramCast = (Parameter) ((MethodDeclaration) member1s.get(i)).getChildrenNodes();
-                                    if(param.equals("{}")) {
+                                    /*if (param.length() <= 3) {
                                         paramStr = "";
                                     } else {
-                                        paramStr = param.substring(1,paramStr.length()-2);  //{STR}
-                                    }
-                                    add3 = add3 + mod1 + methodNameString + "(" + paramStr + ") : " + ((MethodDeclaration) member1s.get(i)).getChildrenNodes().get(0) ;
-                                    System.out.println("add3 ====="+add3);
-                                } else if (((MethodDeclaration) member1s.get(i)).getDeclarationAsString().substring(0,6).equals("private")){
-                                    mod1 = "-";
+                                        paramStr = param.substring(1, paramStr.length() - 2);  //{STR}
+                                    }*/
+                                    paramStr = ((MethodDeclaration) member1s.get(i)).getChildrenNodes().get(1).toString();
+                                    add2 = add2 + mod1+" " + methodNameString + "(" + paramStr + ") : " + ((MethodDeclaration) member1s.get(i)).getChildrenNodes().get(0);
+                                    System.out.println("add2 =====" + add2);
+                                } else if (((MethodDeclaration) member1s.get(i)).getDeclarationAsString().substring(0, 6).equals("private")) {
+                                    mod1 = "- ";
                                 }
-                                System.out.println("methodNameString ====="+methodNameString);
+                                System.out.println("methodNameString =====" + methodNameString);
                             }
                         }
                     }
                 }
             }
+            if (member1s.get(i) instanceof FieldDeclaration) {
+                System.out.println("Field --- " + member1s.get(i));
+                int fieldDeclarationModifiers = ((FieldDeclaration) member1s.get(i)).getModifiers();
+                boolean proceed = false;
+                System.out.println("fieldDeclarationModifiers --- " + fieldDeclarationModifiers);
+
+                System.out.println("Type --- " + ((FieldDeclaration) member1s.get(i)).getVariables());
+                //returnString = returnString + modifier + " ";
+                List<Node> fieldChildNodes = ((FieldDeclaration) member1s.get(i)).getChildrenNodes();
+                String nodeType = ((FieldDeclaration) member1s.get(i)).getType().toString();
+                System.out.println("nodeType1234 --- " + nodeType);
+                if (nodeType.contains("int") || nodeType.contains("String")) {
+                    System.out.println("nodeType --- " + nodeType);
+                    System.out.println("getterSetterName --- " + getterSetterName);
+                    nType = filterName(nodeType);
+                    if (fieldDeclarationModifiers == ModifierSet.PRIVATE) {
+                        modifier = "-";
+                        fieldModMap.put(fieldChildNodes.get(1).toString(), modifier);
+                        fieldNameMap.put(fieldChildNodes.get(1).toString(), " : " + nType + ";");
+                    } else if (fieldDeclarationModifiers == ModifierSet.PUBLIC) {
+                        modifier = "+";
+                        fieldModMap.put(fieldChildNodes.get(1).toString(), modifier);
+                        fieldNameMap.put(fieldChildNodes.get(1).toString(), " : " + nType + ";");
+                    } else if (fieldDeclarationModifiers == ModifierSet.PUBLIC + ModifierSet.STATIC) {
+                        modifier = "+";
+                        fieldModMap.put(fieldChildNodes.get(1).toString(), modifier);
+                        fieldNameMap.put(fieldChildNodes.get(1).toString(), " : " + nType + ";");
+                        //returnModString = returnModString + modifier + " " + fieldChildNodes.get(1) + " : " + nType + ";";
+                    }
+                    System.out.println("modifier " + modifier);
+                    //returnModString = returnModString + modifier + " " + fieldChildNodes.get(1) + " : " + nType + ";";
+                } else {
+                    String collectionClassName = "";
+                    System.out.println("Check 1234 " + nodeType);
+                    if (nodeType.startsWith("Collection")) {
+                        collectionClassName = nodeType.substring(11, nodeType.length() - 1);
+                        System.out.println("Key --- " + collectionClassName);
+                    } else
+                        collectionClassName = nodeType;
+                    if (!hMapClass.containsKey(collectionClassName)) {
+                        hMapClass.put(collectionClassName, nodeType + "|" + strClassName);
+                    }
+                }
+
+                //for(int k = 0; k < fieldChildNodes.size(); k++){
+                System.out.println("fieldName --- " + fieldChildNodes.get(1));
+                //}
+
+            }
+            if (member1s.get(i) instanceof ConstructorDeclaration) {
+                System.out.println("Constructor --- " + member1s.get(i));
+            }
+
         }
 
-        if(hMapClass.containsKey(strClassName)) {
+        if (hMapClass.containsKey(strClassName)) {
             depFlag = true;
-            System.out.println("hmap : "+hMapClass);
+            System.out.println("hmap : " + hMapClass);
             //if(strClassName )
             String strDependency = "";
             String dependentPart = "";
@@ -254,13 +267,13 @@ public class JavaParserA {
             int classNameIndex = 0;
             strDependency = hMapClass.get(strClassName);
             classNameIndex = strDependency.indexOf("|");
-            System.out.println("Rovin 1234 "+strDependency +"|" + classNameIndex);
-            className = strDependency.substring(classNameIndex+1,strDependency.length());
-            remName = strDependency.substring(0,classNameIndex);
-            System.out.println("strDependency ------------ "+strDependency);
-            System.out.println("strClassName1234 ------------ "+strClassName);
-            System.out.println("remName ------------ "+remName);
-            if(strClassName != remName) {
+            System.out.println("Rovin 1234 " + strDependency + "|" + classNameIndex);
+            className = strDependency.substring(classNameIndex + 1, strDependency.length());
+            remName = strDependency.substring(0, classNameIndex);
+            System.out.println("strDependency ------------ " + strDependency);
+            System.out.println("strClassName1234 ------------ " + strClassName);
+            System.out.println("remName ------------ " + remName);
+            if (strClassName != remName) {
                 if (strDependency.contains("Collection")) {
                     dependentPart = dependentPart + "-*[" + strClassName + "]";
                 } else {
@@ -274,10 +287,24 @@ public class JavaParserA {
                 }
             }
         }
+        //System.out.println("returnModString -- " + returnModString);
+        //int ind = returnModString.indexOf(";");
+        String modifiedRetModStr = "";
+        //String smallStr = "";
+
+        for (String key : fieldModMap.keySet()) {
+            System.out.println("key: " + key + " value: " + fieldModMap.get(key));
+            if (getterSetterName.contains(key)) {
+                returnModString = returnModString + "+ " + key + fieldNameMap.get(key);
+            } else {
+                returnModString = returnModString +fieldModMap.get(key)+" "+ key + fieldNameMap.get(key);
+            }
+        }
+
         if(depFlag) {
             returnString = returnString + returnModString +returnDepString + "],";
         } else
-        returnString = returnString + returnClassString + returnModString +returnDepString + additions + add2+"],";
+        returnString = returnString + returnClassString + returnModString +returnDepString + additions +"|"+add2 + "],";
         System.out.println("Output : "+returnString + "]");
 
         return strClassName;
