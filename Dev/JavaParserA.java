@@ -28,7 +28,7 @@ public class JavaParserA {
     public static void main(String[] args) throws Exception {
         JavaParserA JP = new JavaParserA();
         String inputForYUML = "";
-        cuArray = JP.getFileArray("/Volumes/Macintosh HD/SJSU/202/CodeJavaParser/uml-parser-test-2");
+        cuArray = JP.getFileArray("/Volumes/Macintosh HD/SJSU/202/CodeJavaParser/uml-parser-test-3");
         int counter = 1;
         for (CompilationUnit cu : cuArray) {
             inputForYUML += JP.getYUMLCode(cu);
@@ -215,10 +215,22 @@ public class JavaParserA {
                             } else {
                                 String mod1 = "";
                                 String add3 = "";
+                                String param = "";
+                                String paramStr = "";
                                 methodNameString = (((MethodDeclaration) member1s.get(i))).getName();
                                 if(((MethodDeclaration) member1s.get(i)).getDeclarationAsString().substring(0,6).equals("public")){
                                     mod1 = "+";
-                                    add3 = add3 + mod1 + methodNameString + "(" + ((MethodDeclaration) member1s.get(i)).getChildrenNodes().get(1) + ") : " + ((MethodDeclaration) member1s.get(i)).getChildrenNodes().get(0) ;
+                                    param = ((MethodDeclaration) member1s.get(i)).getChildrenNodes().get(1).toString();
+                                    System.out.println("Param ---"+param);
+                                    System.out.println("Param ---"+param.length());
+                                    Parameter paramCast;
+                                    //paramCast = (Parameter) ((MethodDeclaration) member1s.get(i)).getChildrenNodes();
+                                    if(param.equals("{}")) {
+                                        paramStr = "";
+                                    } else {
+                                        paramStr = param.substring(1,paramStr.length()-2);  //{STR}
+                                    }
+                                    add3 = add3 + mod1 + methodNameString + "(" + paramStr + ") : " + ((MethodDeclaration) member1s.get(i)).getChildrenNodes().get(0) ;
                                     System.out.println("add3 ====="+add3);
                                 } else if (((MethodDeclaration) member1s.get(i)).getDeclarationAsString().substring(0,6).equals("private")){
                                     mod1 = "-";
