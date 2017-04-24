@@ -103,7 +103,7 @@ public class JavaParserA {
             //}
         }
 
-        if (coi.getExtends() != null) {
+        /*if (coi.getExtends() != null) {
             additions += "] " + "-^ " + coi.getExtends();
             additions += ",";
             System.out.println("Extends ---- " + additions);
@@ -116,8 +116,8 @@ public class JavaParserA {
                         + "<<interface>>;" + intface + "]";
                 additions += ",";
             }
-            //System.out.println("adInt ---- " + additions);
-        }
+            System.out.println("Implements ---- " + additions);
+        }*/
 
         System.out.println("ClassName --- " + strClassName);
         List<BodyDeclaration> member1s = ((TypeDeclaration) node).getMembers();
@@ -126,15 +126,15 @@ public class JavaParserA {
             String nType = "";
             if (member1s.get(i) instanceof MethodDeclaration) {
                 String methodNameString = "";
-                //System.out.println("Method --- " + member1s.get(i));
-                String mod = ((MethodDeclaration) member1s.get(i)).getDeclarationAsString().substring(0, 6);
+                System.out.println("Method --- " + ((MethodDeclaration) member1s.get(i)).getName());
+                //String mod = ((MethodDeclaration) member1s.get(i)).getDeclarationAsString().substring(0, 6);
 
                 //MethodDeclaration md = ((MethodDeclaration) member1s.get(i));
                 //System.out.println(md);
                 if (((MethodDeclaration) member1s.get(i)).getDeclarationAsString().substring(0, 6).equals("public")) {
                     //System.out.println("12345");
                     //System.out.println("Get SET " + ((MethodDeclaration) member1s.get(i)).getName().substring(0, 3));
-                    System.out.println("Get SET " + ((MethodDeclaration) member1s.get(i)).getName().substring(3));
+                    //System.out.println("Get SET " + ((MethodDeclaration) member1s.get(i)).getName().substring(3));
                     if (((MethodDeclaration) member1s.get(i)).getName().substring(0, 3).equals("set")
                             || ((MethodDeclaration) member1s.get(i)).getName().substring(0, 3).equals("get")) {
                         String varName = ((MethodDeclaration) member1s.get(i)).getName().substring(3);
@@ -146,34 +146,25 @@ public class JavaParserA {
                         int fIndex;
                         int lIndex;
                         int kIndex;
-                        String intName;
+                        String intName = "";
                         String varName = "";
                         fIndex = ((MethodDeclaration) member1s.get(i)).getChildrenNodes().toString().indexOf(", ");
-                        System.out.println("methodNameString ---" + methodNameString);
-                        System.out.println("methodNameString\n\n\n\n ---" + ((MethodDeclaration) member1s.get(i)).getChildrenNodes().toString());
-                        //System.out.println("Children node === " + ((MethodDeclaration) member1s.get(i)).getChildrenNodes());
                         //if (fIndex > 0) {
                             //System.out.println("fIndex  --- " + fIndex);
                             String strRem = ((MethodDeclaration) member1s.get(i)).getChildrenNodes().toString().substring(fIndex + 2);
-                            //System.out.println("strRem  --- " + strRem);
+                            System.out.println("strRem  --- " + strRem);
                             lIndex = strRem.indexOf(" ");
                             kIndex = strRem.indexOf(",");
-                            //lIndex = ((MethodDeclaration) member1s.get(i)).getChildrenNodes().;
                             if (lIndex > 0 && kIndex > 0) {
-                                intName = strRem.substring(0, lIndex);
-                                //varName = strRem.substring(lIndex + 1, kIndex);
-                                //System.out.println("intName === " + intName);
-                                // System.out.println("varName === " + varName);
+                                //intName = strRem.substring(0, lIndex);
                                 for(int q = 0; q<(((MethodDeclaration) member1s.get(i))).getParameters().size();q++){
                                     //System.out.println("--------------------------ID ---"+(((MethodDeclaration) member1s.get(i))).getParameters().get(q).getId());
                                     System.out.println("-------------------------Type ----"+(((MethodDeclaration) member1s.get(i))).getParameters().get(q).getType());
                                     varName = (((MethodDeclaration) member1s.get(i))).getParameters().get(q).getId().toString() + " : "+(((MethodDeclaration) member1s.get(i))).getParameters().get(q).getType().toString();
-
+                                    intName = (((MethodDeclaration) member1s.get(i))).getParameters().get(q).getType().toString();
                                 }
-                                methodNameString = "+ " + (((MethodDeclaration) member1s.get(i))).getName() + "(" + varName + ") : " + ((MethodDeclaration) member1s.get(i)).getChildrenNodes().get(0);
-                                System.out.println("\n\n\n\n\n\n methodName =============== " + methodNameString);
-                                System.out.println("varName =============== " + varName);
-                                // System.out.println("methodParamName === " + (((MethodDeclaration) member1s.get(i))).getParameters());
+                                methodNameString = "+ " + (((MethodDeclaration) member1s.get(i))).getName() + "(" + varName + ") : " + ((MethodDeclaration) member1s.get(i)).getChildrenNodes().get(0)+";";
+                                System.out.println("intName --- "+intName);
                                 if (interfaceMap.containsKey(intName)) {
                                     add2 += add2 + methodNameString + "] uses -.->[<<interface>>;" + intName + "]";
                                 } else {
@@ -194,7 +185,7 @@ public class JavaParserA {
                                     for(int q = 0; q<(((MethodDeclaration) member1s.get(i))).getParameters().size();q++){
                                         //System.out.println("--------------------------ID ---"+(((MethodDeclaration) member1s.get(i))).getParameters().get(q).getId());
                                         System.out.println("-------------------------Type ----"+(((MethodDeclaration) member1s.get(i))).getParameters().get(q).getType());
-                                        paramStr = (((MethodDeclaration) member1s.get(i))).getParameters().get(q).getId().toString() + " : "+(((MethodDeclaration) member1s.get(i))).getParameters().get(q).getType();
+                                        paramStr = (((MethodDeclaration) member1s.get(i))).getParameters().get(q).getId().toString() + " : "+(((MethodDeclaration) member1s.get(i))).getParameters().get(q).getType().toString();
 
                                     }
                                     //Parameter paramCast;
@@ -205,10 +196,7 @@ public class JavaParserA {
                                         paramStr = param.substring(1, paramStr.length() - 2);  //{STR}
                                     }*/
                                     //paramStr = ((MethodDeclaration) member1s.get(i)).getChildrenNodes().get(1).toString();
-                                    System.out.println("\n\n\n/n/n The String that I want "+((MethodDeclaration) member1s.get(i)).getChildrenNodes().get(0));
-                                    System.out.println("\n/n\n/n/n The methodNameString that I want "+methodNameString);
-                                    System.out.println("\n/n/n/n/n The paramStr that I want "+methodNameString);
-                                    add2 = add2 + mod1+" " + methodNameString + "(" + paramStr + ") : " + ((MethodDeclaration) member1s.get(i)).getChildrenNodes().get(0);
+                                   add2 = add2 + mod1+" " + methodNameString + "(" + paramStr + ") : " + ((MethodDeclaration) member1s.get(i)).getChildrenNodes().get(0) + ";";
                                     //System.out.println("add2 =====" + add2);
                                 } else if (((MethodDeclaration) member1s.get(i)).getDeclarationAsString().substring(0, 6).equals("private")) {
                                     mod1 = "- ";
@@ -220,19 +208,16 @@ public class JavaParserA {
                 }
             }
             if (member1s.get(i) instanceof FieldDeclaration) {
-                System.out.println("Field --- " + member1s.get(i));
                 int fieldDeclarationModifiers = ((FieldDeclaration) member1s.get(i)).getModifiers();
                 boolean proceed = false;
-                System.out.println("fieldDeclarationModifiers --- " + fieldDeclarationModifiers);
 
-                System.out.println("Type --- " + ((FieldDeclaration) member1s.get(i)).getVariables());
+                //System.out.println("Type --- " + ((FieldDeclaration) member1s.get(i)).getVariables());
                 //returnString = returnString + modifier + " ";
                 List<Node> fieldChildNodes = ((FieldDeclaration) member1s.get(i)).getChildrenNodes();
                 String nodeType = ((FieldDeclaration) member1s.get(i)).getType().toString();
-                System.out.println("nodeType1234 --- " + nodeType);
                 if (nodeType.contains("int") || nodeType.contains("String")) {
-                    System.out.println("nodeType --- " + nodeType);
-                    System.out.println("getterSetterName --- " + getterSetterName);
+                    //System.out.println("nodeType --- " + nodeType);
+                    //System.out.println("getterSetterName --- " + getterSetterName);
                     nType = filterName(nodeType);
                     if (fieldDeclarationModifiers == ModifierSet.PRIVATE) {
                         modifier = "-";
@@ -248,14 +233,14 @@ public class JavaParserA {
                         fieldNameMap.put(fieldChildNodes.get(1).toString(), " : " + nType + ";");
                         //returnModString = returnModString + modifier + " " + fieldChildNodes.get(1) + " : " + nType + ";";
                     }
-                    System.out.println("modifier " + modifier);
+                    //System.out.println("modifier " + modifier);
                     //returnModString = returnModString + modifier + " " + fieldChildNodes.get(1) + " : " + nType + ";";
                 } else {
                     String collectionClassName = "";
-                    System.out.println("Check 1234 " + nodeType);
+                    //System.out.println("Check 1234 " + nodeType);
                     if (nodeType.startsWith("Collection")) {
                         collectionClassName = nodeType.substring(11, nodeType.length() - 1);
-                        System.out.println("Key --- " + collectionClassName);
+                        //System.out.println("Key --- " + collectionClassName);
                     } else
                         collectionClassName = nodeType;
                     if (!hMapClass.containsKey(collectionClassName)) {
@@ -264,19 +249,19 @@ public class JavaParserA {
                 }
 
                 //for(int k = 0; k < fieldChildNodes.size(); k++){
-                System.out.println("fieldName --- " + fieldChildNodes.get(1));
+                //System.out.println("fieldName --- " + fieldChildNodes.get(1));
                 //}
 
             }
             if (member1s.get(i) instanceof ConstructorDeclaration) {
-                System.out.println("Constructor --- " + member1s.get(i));
+                //System.out.println("Constructor --- " + member1s.get(i));
             }
 
         }
 
         if (hMapClass.containsKey(strClassName)) {
             depFlag = true;
-            System.out.println("hmap : " + hMapClass);
+            //System.out.println("hmap : " + hMapClass);
             //if(strClassName )
             String strDependency = "";
             String dependentPart = "";
@@ -285,17 +270,17 @@ public class JavaParserA {
             int classNameIndex = 0;
             strDependency = hMapClass.get(strClassName);
             classNameIndex = strDependency.indexOf("|");
-            System.out.println("Rovin 1234 " + strDependency + "|" + classNameIndex);
+            //System.out.println("Rovin 1234 " + strDependency + "|" + classNameIndex);
             className = strDependency.substring(classNameIndex + 1, strDependency.length());
             remName = strDependency.substring(0, classNameIndex);
-            System.out.println("strDependency ------------ " + strDependency);
-            System.out.println("strClassName1234 ------------ " + strClassName);
-            System.out.println("remName ------------ " + remName);
+            //System.out.println("strDependency ------------ " + strDependency);
+            //System.out.println("strClassName1234 ------------ " + strClassName);
+            //System.out.println("remName ------------ " + remName);
             if (strClassName != remName) {
                 if (strDependency.contains("Collection")) {
                     dependentPart = dependentPart + "-*[" + strClassName + "]";
                 } else {
-                    dependentPart = dependentPart + "-1[" + strClassName + "]";
+                    dependentPart = dependentPart + "-[" + strClassName + "]";
                 }
 
                 if (returnString.contains(",")) {
@@ -304,6 +289,17 @@ public class JavaParserA {
                     returnDepString = returnDepString + "]" + dependentPart;
                 }
             }
+            String implText = "";
+            if (coi.getImplements() != null) {
+                List<ClassOrInterfaceType> interfaceList = (List<ClassOrInterfaceType>) coi.getImplements();
+                for (ClassOrInterfaceType intface : interfaceList) {
+                    implText += ",[" + coi.getName() + "] " + "-.-^ " + "["
+                            + "<<interface>>;" + intface + "]";
+                    implText += ",";
+                }
+                //System.out.println("Implements ---- " + additions);
+            }
+            returnDepString = returnDepString + implText;
         }
         //System.out.println("returnModString -- " + returnModString);
         //int ind = returnModString.indexOf(";");
@@ -319,17 +315,43 @@ public class JavaParserA {
             }
         }
 
-        System.out.println("Class String "+returnClassString);
-        System.out.println("Mod String "+returnModString);
-        System.out.println("Dep String "+returnDepString);
-        System.out.println("additions "+additions);
-        System.out.println("add2 "+add2);
+        if (coi.getExtends() != null) {
+            additions += "] " + "-^ " + coi.getExtends();
+            additions += ",";
+            System.out.println("Extends ---- " + additions);
+        }
+
 
         if(depFlag) {
             returnString = returnString + returnModString +returnDepString + "],";
-        } else
-            returnString = returnString + returnClassString + returnModString +returnDepString + additions +"|"+add2 + "],";
+        } else {
+            returnString = returnString + returnClassString + returnModString + returnDepString + "|" + add2;
+            if (coi.getImplements() != null) {
+                List<ClassOrInterfaceType> interfaceList = (List<ClassOrInterfaceType>) coi
+                        .getImplements();
+                for (ClassOrInterfaceType intface : interfaceList) {
+                    System.out.println("COI Name --- "+coi.getName());
+                    System.out.println("COI returnString --- "+returnString);
+                    if(returnString.endsWith(",") || returnString.endsWith("|")) {
+                        additions += "[" + coi.getName() + "] " + "-.-^ " + "["
+                                + "<<interface>>;" + intface + "]";
+                        additions += ",";
+                        System.out.println("additions --- " + additions);
+                    } else {
+                        additions += "] " + "-.-^ " + "["
+                                + "<<interface>>;" + intface + "]";
+                        additions += ",";
+                        System.out.println("additions --- " + additions);
+                    }
+                }
+                System.out.println("Implements ---- " + additions);
+            }
+            returnString = returnString + additions + "],";
+        }
         System.out.println("Output : "+returnString + "]");
+        System.out.println("additions --- "+additions);
+        System.out.println("depFlag --- "+depFlag);
+        System.out.println("interfaceMap --- "+interfaceMap);
 
         return strClassName;
     }
