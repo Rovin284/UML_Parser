@@ -28,7 +28,7 @@ public class JavaParserA {
     public static void main(String[] args) throws Exception {
         JavaParserA JP = new JavaParserA();
         String inputForYUML = "";
-        cuArray = JP.getFileArray("/Volumes/Macintosh HD/SJSU/202/CodeJavaParser/Test1");
+        cuArray = JP.getFileArray("/Volumes/Macintosh HD/SJSU/202/CodeJavaParser/uml-parser-test-4");
         int counter = 1;
         for (CompilationUnit cu : cuArray) {
             inputForYUML += JP.getYUMLCode(cu);
@@ -147,7 +147,7 @@ public class JavaParserA {
                         int lIndex;
                         int kIndex;
                         String intName;
-                        String varName;
+                        String varName = "";
                         fIndex = ((MethodDeclaration) member1s.get(i)).getChildrenNodes().toString().indexOf(", ");
                         System.out.println("methodNameString ---" + methodNameString);
                         System.out.println("methodNameString\n\n\n\n ---" + ((MethodDeclaration) member1s.get(i)).getChildrenNodes().toString());
@@ -161,17 +161,18 @@ public class JavaParserA {
                             //lIndex = ((MethodDeclaration) member1s.get(i)).getChildrenNodes().;
                             if (lIndex > 0 && kIndex > 0) {
                                 intName = strRem.substring(0, lIndex);
-                                varName = strRem.substring(lIndex + 1, kIndex);
+                                //varName = strRem.substring(lIndex + 1, kIndex);
                                 //System.out.println("intName === " + intName);
                                 // System.out.println("varName === " + varName);
                                 for(int q = 0; q<(((MethodDeclaration) member1s.get(i))).getParameters().size();q++){
                                     //System.out.println("--------------------------ID ---"+(((MethodDeclaration) member1s.get(i))).getParameters().get(q).getId());
                                     System.out.println("-------------------------Type ----"+(((MethodDeclaration) member1s.get(i))).getParameters().get(q).getType());
-                                    varName = (((MethodDeclaration) member1s.get(i))).getParameters().get(q).getId().toString() + " : "+(((MethodDeclaration) member1s.get(i))).getParameters().get(q).getType();
+                                    varName = (((MethodDeclaration) member1s.get(i))).getParameters().get(q).getId().toString() + " : "+(((MethodDeclaration) member1s.get(i))).getParameters().get(q).getType().toString();
 
                                 }
-                                methodNameString = "+ " + (((MethodDeclaration) member1s.get(i))).getName() + "(" + varName + ":" + intName + ") : " + ((MethodDeclaration) member1s.get(i)).getChildrenNodes().get(0);
+                                methodNameString = "+ " + (((MethodDeclaration) member1s.get(i))).getName() + "(" + varName + ") : " + ((MethodDeclaration) member1s.get(i)).getChildrenNodes().get(0);
                                 System.out.println("\n\n\n\n\n\n methodName =============== " + methodNameString);
+                                System.out.println("varName =============== " + varName);
                                 // System.out.println("methodParamName === " + (((MethodDeclaration) member1s.get(i))).getParameters());
                                 if (interfaceMap.containsKey(intName)) {
                                     add2 += add2 + methodNameString + "] uses -.->[<<interface>>;" + intName + "]";
