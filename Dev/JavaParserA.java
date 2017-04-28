@@ -82,11 +82,18 @@ public class JavaParserA {
         String returnConsString = "";
         String additions = "";
         String add2 = "";
+        String interfaceString = "";
+        String associationString = "";
+        String associationRetString = "";
         HashSet<String> hSetMethodNameB = new HashSet<String>();
         HashSet<String> hSetMethodNameA = new HashSet<String>();
         HashSet<String> hSetMethodNameC = new HashSet<String>();
+        HashSet<String> hClassName = new HashSet<String>();
+        HashSet<String> hSetAssociation = new HashSet<String>();
+        HashSet<String> hSetInterface = new HashSet<String>();
         HashMap<String,String> fieldNameMap = new HashMap<String,String>();
         HashMap<String,String> fieldModMap = new HashMap<String,String>();
+        //HashMap<String,String> associationMap = new HashMap<String,String>();
         boolean depFlag = false;
         List<TypeDeclaration> ltd = cu.getTypes();
         Node node = ltd.get(0);
@@ -97,11 +104,14 @@ public class JavaParserA {
             strClassName = "[" + "«interface»;";
             classNameString = "[" + "«interface»;" + coi.getName();
             strClassName += coi.getName();
+            hClassName.add(coi.getName());
+            hSetInterface.add(coi.getName().toString());
             //interfaceString = interfaceString + "[" + strClassName;
             interfaceMap.put(coi.getName(), strClassName);
 
         } else {
             strClassName += coi.getName();
+            hClassName.add(coi.getName());
             //if (coi.getExtends() == null) {
             returnClassString = returnClassString + "[" + strClassName + "|";
             classNameString = "[" + strClassName;
@@ -139,7 +149,7 @@ public class JavaParserA {
                         //if (fIndex > 0) {
                         //System.out.println("fIndex  --- " + fIndex);
                         String strRem = ((MethodDeclaration) member1s.get(i)).getChildrenNodes().toString().substring(fIndex + 2);
-                        System.out.println("strRem  --- " + strRem);
+                        //System.out.println("strRem  --- " + strRem);
                         lIndex = strRem.indexOf(" ");
                         kIndex = strRem.indexOf(",");
                         if (lIndex > 0 && kIndex > 0) {
@@ -157,9 +167,12 @@ public class JavaParserA {
                                     hSetMethodNameC.add(s);
                                 }
                             }
+
                             System.out.println("intName --- "+intName);
+                            System.out.println("interfaceMap --- "+interfaceMap);
                             if (interfaceMap.containsKey(intName)) {
                                 add2 = add2 + "] uses -.->[«interface»;" + intName + "]";
+                                interfaceString = "["+ strClassName + "] uses -.->[«interface»;" + intName + "]";
                             }
                         } else {
                             String mod1 = "";
@@ -230,7 +243,7 @@ public class JavaParserA {
 
                 List<Node> fieldChildNodes = ((FieldDeclaration) member1s.get(i)).getChildrenNodes();
                 String nodeType = ((FieldDeclaration) member1s.get(i)).getType().toString();
-                if (nodeType.contains("int") || nodeType.contains("String")) {
+                if (nodeType.contains("int") || nodeType.contains("String") || nodeType.contains("boolean")) {
                     //System.out.println("getterSetterName --- " + getterSetterName);
                     nType = filterName(nodeType);
                     if (fieldDeclarationModifiers == ModifierSet.PRIVATE) {
@@ -250,12 +263,23 @@ public class JavaParserA {
                     //returnModString = returnModString + modifier + " " + fieldChildNodes.get(1) + " : " + nType + ";";
                 } else {
                     String collectionClassName = "";
-                    if (nodeType.startsWith("Collection")) {
-                        collectionClassName = nodeType.substring(11, nodeType.length() - 1);
-                    } else
+                    String associationType = "";
+                    System.out.println("nodeType INSIDE ELSE ---- "+nodeType);
+                    if (nodeType.contains("<") && nodeType.contains(">")) {
+                        int aIndex = nodeType.indexOf("<");
+                        int bIndex = nodeType.indexOf(">");
+                        if(bIndex > aIndex){
+                            collectionClassName = nodeType.substring(aIndex+1,bIndex);
+                            associationType = "*";
+                            System.out.println("nodeType INSIDE ELSE ---- "+aIndex +"  " + bIndex +"  " +collectionClassName);
+                        }
+                        //collectionClassName = nodeType.substring(11, nodeType.length() - 1);
+                    } else {
                         collectionClassName = nodeType;
+                        associationType = "1";
+                    }
                     if (!hMapClass.containsKey(collectionClassName)) {
-                        hMapClass.put(collectionClassName, nodeType + "|" + strClassName);
+                        hMapClass.put(collectionClassName, associationType + "|" + strClassName);
                     }
                 }
 
@@ -310,20 +334,20 @@ public class JavaParserA {
             //System.out.println("Rovin 1234 " + strDependency + "|" + classNameIndex);
             className = strDependency.substring(classNameIndex + 1, strDependency.length());
             remName = strDependency.substring(0, classNameIndex);
-            //System.out.println("strDependency ------------ " + strDependency);
+            System.out.println("remName ------------ " + remName);
             //System.out.println("strClassName1234 ------------ " + strClassName);
             //System.out.println("remName ------------ " + remName);
             if (strClassName != remName) {
                 if (strDependency.contains("<"+strClassName+">")) {
-                    dependentPart = dependentPart + "-*[" + strClassName + "]";
+                    //dependentPart = dependentPart + "-*[" + strClassName + "]";
                 } else {
-                    dependentPart = dependentPart + "-[" + strClassName + "]";
+                    //dependentPart = dependentPart + "-[" + strClassName + "]";
                 }
 
                 if (returnString.contains(",")) {
-                    returnDepString = returnDepString + "[" + className + "]" + dependentPart;
+                    //returnDepString = returnDepString + "[" + className + "]" + dependentPart;
                 } else {
-                    returnDepString = returnDepString + "]" + dependentPart;
+                    //returnDepString = returnDepString + "]" + dependentPart;
                 }
             }
             String implText = "";
@@ -333,16 +357,59 @@ public class JavaParserA {
                     implText += ",[" + coi.getName() + "] " + "-.-^ " + "["
                             + "«interface»;" + intface + "]";
                     implText += ",";
+
                 }
                 //System.out.println("Implements ---- " + additions);
             }
             returnDepString = returnDepString + implText;
+
         }
         //System.out.println("returnModString -- " + returnModString);
         //int ind = returnModString.indexOf(";");
         String modifiedRetModStr = "";
         //String smallStr = "";
 
+
+        System.out.println(">>>>>>>>>>>>>>>>>>>> "+hMapClass);
+        System.out.println(">>>>>>>>>>>>>>>>>>>> hClassName "+hClassName);
+        if(hClassName.size() > 0) {
+            for (String s : hClassName) {
+                if(hMapClass.containsKey(s)){
+                    String name = hMapClass.get(s);
+                    String multiplicity = name.substring(0,1);
+                    System.out.println(">>>>"+multiplicity);
+                    String classN = name.substring(2,name.length());
+                    if(multiplicity.equals("*")){
+                        System.out.println(hSetInterface);
+                        System.out.println(s);
+                        System.out.println(hSetInterface.contains(s));
+                        if(hSetInterface.contains(s)) {
+                            associationString = "[" + classN + "]-*[«interface»;" + s + "],";
+                        } else {
+                            associationString = "[" + classN + "]-*[" + s + "],";
+                        }
+                        /*if(hSetInterface.contains(classN)){
+                            associationString = "[«interface»" + classN + "]-*[" + s + "],";
+                        } else {
+                            associationString = "[" + classN + "]-*[" + s + "],";
+                        }*/
+                    } else {
+                        if(hSetInterface.contains(s)) {
+                            associationString = "[" + classN + "]-[«interface»;" + s + "],";
+                        } else {
+                            associationString = "[" + classN + "]-[" + s + "],";
+                        }
+                        /*if(hSetInterface.contains(classN)){
+                            associationString = "[«interface»" + classN + "]-[" + s + "],";
+                        } else {
+                            associationString = "[" + classN + "]-[" + s + "],";
+                        }*/
+                    }
+                    System.out.println("<<<<<<<<<<<<<<< "+associationString);
+                    hSetAssociation.add(associationString);
+                }
+            }
+        }
 
 
         if (coi.getExtends() != null) {
@@ -351,6 +418,11 @@ public class JavaParserA {
             System.out.println("Extends ---- " + additions);
         }
 
+        if(hSetAssociation.size() > 0) {
+            for (String s : hSetAssociation) {
+                associationRetString = associationRetString + s;
+            }
+        }
 
         if(depFlag) {
             returnString = returnString + returnModString +returnDepString + "],";
@@ -373,16 +445,18 @@ public class JavaParserA {
                         additions += ",";
                         System.out.println("additions --- " + additions);
                     }
+                    interfaceMap.put(intface.toString(),coi.getName());
                 }
                 System.out.println("Implements ---- " + additions);
             }
             returnString = returnString + additions + "],";
         }
-        returnString = classMethodString + returnString;
+        returnString = classMethodString + returnString + interfaceString + associationRetString;
         System.out.println("Output : "+returnString + "]");
         System.out.println("additions --- "+additions);
         System.out.println("depFlag --- "+depFlag);
         System.out.println("interfaceMap --- "+interfaceMap);
+        System.out.println("associationRetString --- "+associationRetString);
         return strClassName;
     }
 
