@@ -1,7 +1,3 @@
-/**
- * Created by rovinpatwal on 4/9/17.
- */
-
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
@@ -16,7 +12,7 @@ import java.util.List;
 import java.util.HashSet;
 
 public class JavaParserA {
-
+    HashSet<String> hSetAsstn = new HashSet<String>();
     private static ArrayList<CompilationUnit> cuArray;
     public JavaParserA() {
         //System.out.println("Rovin");
@@ -27,8 +23,9 @@ public class JavaParserA {
     public static void main(String[] args) throws Exception {
         JavaParserA JP = new JavaParserA();
         String inputForYUML = "";
-        cuArray = JP.getFileArray("/Volumes/Macintosh HD/SJSU/202/CodeJavaParser/uml-parser-test-4");
+        cuArray = JP.getFileArray("/Volumes/Macintosh HD/SJSU/202/CodeJavaParser/uml-parser-test-5");
         int counter = 1;
+        JP.getInterfaceList(cuArray);
         for (CompilationUnit cu : cuArray) {
             inputForYUML += JP.getYUMLCode(cu);
             //System.out.println("Counter "+counter);
@@ -43,6 +40,20 @@ public class JavaParserA {
         className = getClassName(cu);
         //classShortName = coi.getName();
         return className;
+    }
+
+    private void getInterfaceList(ArrayList<CompilationUnit> cuArray){
+        ArrayList<CompilationUnit> cuArray1 = cuArray;
+        for (CompilationUnit cu : cuArray1) {
+            List<TypeDeclaration> ltd = cu.getTypes();
+            Node node = ltd.get(0);
+
+            // Get className
+            ClassOrInterfaceDeclaration coi = (ClassOrInterfaceDeclaration) node;
+            if (coi.isInterface()) {
+                hSetAsstn.add(coi.getName());
+            }
+        }
     }
 
     //Done
@@ -91,6 +102,7 @@ public class JavaParserA {
         HashSet<String> hClassName = new HashSet<String>();
         HashSet<String> hSetAssociation = new HashSet<String>();
         HashSet<String> hSetInterface = new HashSet<String>();
+        HashSet<String> hSetDepedency = new HashSet<String>();
         HashMap<String,String> fieldNameMap = new HashMap<String,String>();
         HashMap<String,String> fieldModMap = new HashMap<String,String>();
         //HashMap<String,String> associationMap = new HashMap<String,String>();
@@ -159,7 +171,7 @@ public class JavaParserA {
                                 intName = (((MethodDeclaration) member1s.get(i))).getParameters().get(q).getType().toString();
                                 //varName.replace("[]","()");
                             }
-                            methodNameString = "+ " + (((MethodDeclaration) member1s.get(i))).getName() + "(" + varName + ") : " + intName+";";
+                            methodNameString = "+ " + (((MethodDeclaration) member1s.get(i))).getName() + "(" + varName + ") : " + ((MethodDeclaration) member1s.get(i)).getChildrenNodes().get(0)+";";
                             hSetMethodNameB.add(methodNameString);
                             add2 = add2 + methodNameString;
                             if(hSetMethodNameB.size() > 0) {
@@ -210,19 +222,19 @@ public class JavaParserA {
                         for (String key : fieldModMap.keySet()) {
                             System.out.println("key: " + key + " value: " + fieldModMap.get(key));
                             if (getterSetterName.contains(key)) {
-                                    int index = returnModString.indexOf(key);
-                                    if(index > 0) {
-                                        System.out.println(index);
-                                        char[] charA = returnModString.toCharArray();
-                                        System.out.println(charA[index - 2]);
-                                        charA[index - 2] = '+';
-                                        String combinedChar = "";
-                                        for(int y = 0; y < charA.length;y++){
-                                            //System.out.print(charA[y]);
-                                            combinedChar = combinedChar + charA[y];
-                                        }
-                                        returnModString = combinedChar;
+                                int index = returnModString.indexOf(key);
+                                if(index > 0) {
+                                    System.out.println(index);
+                                    char[] charA = returnModString.toCharArray();
+                                    System.out.println(charA[index - 2]);
+                                    charA[index - 2] = '+';
+                                    String combinedChar = "";
+                                    for(int y = 0; y < charA.length;y++){
+                                        //System.out.print(charA[y]);
+                                        combinedChar = combinedChar + charA[y];
                                     }
+                                    returnModString = combinedChar;
+                                }
                             }
                         }
 
@@ -234,6 +246,7 @@ public class JavaParserA {
                         }
                         classMethodString = classNameString + "|"+ returnModString + "|" + returnConsString +hSet+"],";
                         System.out.println("classMethodString --- "+classMethodString);
+                        System.out.println("hSet --- "+hSet);
 
                     }
                 }
@@ -314,6 +327,9 @@ public class JavaParserA {
                     System.out.println("Type ======----"+(((ConstructorDeclaration) member1s.get(i))).getParameters().get(h).getType());
                     cType = cType + (((ConstructorDeclaration) member1s.get(i))).getParameters().get(h).getId().toString() + " : "+(((ConstructorDeclaration) member1s.get(i))).getParameters().get(h).getType().toString();
                     //ntName = (((MethodDeclaration) member1s.get(i))).getParameters().get(q).getType().toString();
+                    if(hSetAsstn.contains((((ConstructorDeclaration) member1s.get(i))).getParameters().get(h).getType().toString())){
+                        hSetDepedency.add("[" + strClassName + "]-.->[«interface»;"+(((ConstructorDeclaration) member1s.get(i))).getParameters().get(h).getType() + "],");
+                    }
                 }
                 returnConsString = returnConsString + cModifier + (((ConstructorDeclaration) member1s.get(i))).getName() + "("  + cType +");";
 
@@ -452,12 +468,22 @@ public class JavaParserA {
             }
             returnString = returnString + additions + "],";
         }
-        returnString = classMethodString + returnString + interfaceString + associationRetString;
+
+        String associationString1 = "";
+        if(hSetDepedency.size() > 0) {
+            for (String s : hSetDepedency) {
+                associationString1 = associationString1 + s;
+            }
+        }
+
+        returnString = classMethodString + returnString+ interfaceString + associationString1   + associationRetString;
         System.out.println("Output : "+returnString + "]");
         System.out.println("additions --- "+additions);
         System.out.println("depFlag --- "+depFlag);
         System.out.println("interfaceMap --- "+interfaceMap);
         System.out.println("associationRetString --- "+associationRetString);
+        System.out.println("hSetAsstn --- "+hSetAsstn);
+        System.out.println("associationString1 --- "+associationString1);
         return strClassName;
     }
 
@@ -466,4 +492,3 @@ public class JavaParserA {
         return name;
     }
 }
-
