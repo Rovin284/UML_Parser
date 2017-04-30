@@ -157,8 +157,9 @@ public class JavaParserA {
                             for(int q = 0; q<(((MethodDeclaration) member1s.get(i))).getParameters().size();q++){
                                 varName = (((MethodDeclaration) member1s.get(i))).getParameters().get(q).getId().toString() + " : "+(((MethodDeclaration) member1s.get(i))).getParameters().get(q).getType().toString();
                                 intName = (((MethodDeclaration) member1s.get(i))).getParameters().get(q).getType().toString();
+                                //varName.replace("[]","()");
                             }
-                            methodNameString = "+ " + (((MethodDeclaration) member1s.get(i))).getName() + "(" + varName + ") : " + ((MethodDeclaration) member1s.get(i)).getChildrenNodes().get(0)+";";
+                            methodNameString = "+ " + (((MethodDeclaration) member1s.get(i))).getName() + "(" + varName + ") : " + intName+";";
                             hSetMethodNameB.add(methodNameString);
                             add2 = add2 + methodNameString;
                             if(hSetMethodNameB.size() > 0) {
@@ -171,8 +172,8 @@ public class JavaParserA {
                             System.out.println("intName --- "+intName);
                             System.out.println("interfaceMap --- "+interfaceMap);
                             if (interfaceMap.containsKey(intName)) {
-                                add2 = add2 + "] uses -.->[«interface»;" + intName + "]";
-                                interfaceString = "["+ strClassName + "] uses -.->[«interface»;" + intName + "]";
+                                add2 = add2 + "] uses -.->[«interface»;" + intName + "],";
+                                interfaceString = "["+ strClassName + "] uses -.->[«interface»;" + intName + "],";
                             }
                         } else {
                             String mod1 = "";
@@ -381,12 +382,12 @@ public class JavaParserA {
                     String classN = name.substring(2,name.length());
                     if(multiplicity.equals("*")){
                         System.out.println(hSetInterface);
-                        System.out.println(s);
+                        System.out.println(""+s);
                         System.out.println(hSetInterface.contains(s));
                         if(hSetInterface.contains(s)) {
-                            associationString = "[" + classN + "]-*[«interface»;" + s + "],";
+                            associationString = associationString + "[" + classN + "]-*[«interface»;" + s + "],";
                         } else {
-                            associationString = "[" + classN + "]-*[" + s + "],";
+                            associationString = associationString + "[" + classN + "]-*[" + s + "],";
                         }
                         /*if(hSetInterface.contains(classN)){
                             associationString = "[«interface»" + classN + "]-*[" + s + "],";
@@ -395,9 +396,9 @@ public class JavaParserA {
                         }*/
                     } else {
                         if(hSetInterface.contains(s)) {
-                            associationString = "[" + classN + "]-[«interface»;" + s + "],";
+                            associationString = associationString+"[" + classN + "]-[«interface»;" + s + "],";
                         } else {
-                            associationString = "[" + classN + "]-[" + s + "],";
+                            associationString = associationString +"[" + classN + "]-[" + s + "],";
                         }
                         /*if(hSetInterface.contains(classN)){
                             associationString = "[«interface»" + classN + "]-[" + s + "],";
