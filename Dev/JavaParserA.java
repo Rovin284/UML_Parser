@@ -1,3 +1,5 @@
+//package umlparser.umlparser;
+
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
@@ -10,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.HashSet;
+import java.util.*;
 
 public class JavaParserA {
     HashSet<String> hSetAsstn = new HashSet<String>();
@@ -27,10 +30,13 @@ public class JavaParserA {
         int counter = 1;
         JP.getInterfaceList(cuArray);
         for (CompilationUnit cu : cuArray) {
-            inputForYUML += JP.getYUMLCode(cu);
+            inputForYUML = JP.getYUMLCode(cu);
             //System.out.println("Counter "+counter);
             counter++;
         }
+        //inputForYUML = JP.yumlCodeUniquer(inputForYUML);
+        System.out.println("inputForYUML --- "+inputForYUML);
+        UmlGenerator.generatePNG(inputForYUML, "/Volumes/Macintosh HD/SJSU/202/CodeJavaParser/");
         //System.out.println(inputForYUML);
     }
 
@@ -40,6 +46,13 @@ public class JavaParserA {
         className = getClassName(cu);
         //classShortName = coi.getName();
         return className;
+    }
+
+    private String yumlCodeUniquer(String code) {
+        String[] codeLines = code.split(",");
+        String[] uniqueCodeLines = new LinkedHashSet<String>(Arrays.asList(codeLines)).toArray(new String[0]);
+        String result = String.join(",", uniqueCodeLines);
+        return result;
     }
 
     private void getInterfaceList(ArrayList<CompilationUnit> cuArray){
@@ -96,6 +109,7 @@ public class JavaParserA {
         String interfaceString = "";
         String associationString = "";
         String associationRetString = "";
+        String associationString1 = "";
         HashSet<String> hSetMethodNameB = new HashSet<String>();
         HashSet<String> hSetMethodNameA = new HashSet<String>();
         HashSet<String> hSetMethodNameC = new HashSet<String>();
@@ -161,7 +175,15 @@ public class JavaParserA {
                         //if (fIndex > 0) {
                         //System.out.println("fIndex  --- " + fIndex);
                         String strRem = ((MethodDeclaration) member1s.get(i)).getChildrenNodes().toString().substring(fIndex + 2);
-                        //System.out.println("strRem  --- " + strRem);
+                        if(hSetAsstn.size()>0) {
+                            for (String s : hSetAsstn) {
+                                if (((MethodDeclaration) member1s.get(i)).getChildrenNodes().size() > 2) {
+                                    System.out.println("strMethodDeclaration Children Node  --- " + ((MethodDeclaration) member1s.get(i)).getChildrenNodes().get(2).toString().contains(s));
+                                    hSetDepedency.add("[" + strClassName + "]-.->[«interface»;"+s+"],");
+                                }
+                            }
+
+                        }
                         lIndex = strRem.indexOf(" ");
                         kIndex = strRem.indexOf(",");
                         if (lIndex > 0 && kIndex > 0) {
@@ -171,7 +193,7 @@ public class JavaParserA {
                                 intName = (((MethodDeclaration) member1s.get(i))).getParameters().get(q).getType().toString();
                                 //varName.replace("[]","()");
                             }
-                            methodNameString = "+ " + (((MethodDeclaration) member1s.get(i))).getName() + "(" + varName + ") : " + ((MethodDeclaration) member1s.get(i)).getChildrenNodes().get(0)+";";
+                            methodNameString = "+ " + (((MethodDeclaration) member1s.get(i))).getName() + "(" + varName.replace("[]","()") + ") : " + ((MethodDeclaration) member1s.get(i)).getChildrenNodes().get(0)+";";
                             hSetMethodNameB.add(methodNameString);
                             add2 = add2 + methodNameString;
                             if(hSetMethodNameB.size() > 0) {
@@ -469,7 +491,7 @@ public class JavaParserA {
             returnString = returnString + additions + "],";
         }
 
-        String associationString1 = "";
+
         if(hSetDepedency.size() > 0) {
             for (String s : hSetDepedency) {
                 associationString1 = associationString1 + s;
@@ -484,7 +506,7 @@ public class JavaParserA {
         System.out.println("associationRetString --- "+associationRetString);
         System.out.println("hSetAsstn --- "+hSetAsstn);
         System.out.println("associationString1 --- "+associationString1);
-        return strClassName;
+        return returnString;
     }
 
     private String filterName (String name){
